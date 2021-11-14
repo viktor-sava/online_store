@@ -35,11 +35,25 @@ public class Queries {
                         "SELECT c.id, chl.name, c.picture, c.modified_at FROM category c " +
                         "JOIN category_has_language chl on c.id = chl.category_id " +
                         "JOIN language l on chl.language_id = l.id " +
-                        "WHERE l.short_name = ? AND parent_id = ?  AND NOT EXISTS( " +
+                        "WHERE l.short_name = ? AND parent_id = ? AND NOT EXISTS( " +
                         "SELECT 1 FROM category c2 " +
                         "JOIN category_has_language chl2 on c2.id = chl2.category_id " +
                         "JOIN language l2 on chl2.language_id = l2.id " +
                         "WHERE l2.short_name IN (?) AND parent_id = ? AND c2.id = c.id) ORDER BY name";
+        public static final String FIND_CATEGORIES_BY_PARENT_ID_BY_ORDER_NAME_NULL =
+                "SELECT c.id, chl.name, c.picture, c.modified_at FROM category c " +
+                        "JOIN category_has_language chl on c.id = chl.category_id " +
+                        "JOIN language l on chl.language_id = l.id " +
+                        "WHERE l.short_name = ? AND parent_id IS NULL " +
+                        "UNION ALL " +
+                        "SELECT c.id, chl.name, c.picture, c.modified_at FROM category c " +
+                        "JOIN category_has_language chl on c.id = chl.category_id " +
+                        "JOIN language l on chl.language_id = l.id " +
+                        "WHERE l.short_name = ? AND parent_id IS NULL AND NOT EXISTS( " +
+                        "SELECT 1 FROM category c2 " +
+                        "JOIN category_has_language chl2 on c2.id = chl2.category_id " +
+                        "JOIN language l2 on chl2.language_id = l2.id " +
+                        "WHERE l2.short_name IN (?) AND parent_id IS NULL AND c2.id = c.id) ORDER BY name";
         public static final String FIND_CATEGORY_TREE_BY_NAME_AND_LOCALE =
                 "WITH RECURSIVE cte (id, name, parent_id, short_name) AS (" +
                 "SELECT category.id, name, parent_id, l.short_name FROM category " +

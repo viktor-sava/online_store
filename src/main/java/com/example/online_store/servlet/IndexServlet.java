@@ -31,10 +31,9 @@ public class IndexServlet extends AbstractServlet {
 
     @Override
     public void init() {
-        DAOFactory daoFactory = (DAOFactory) getServletContext().getAttribute("daoFactory");
-        this.categoryDao = daoFactory.getCategoryDao();
-        this.productDao = daoFactory.getProductDao();
-        this.bannerDao = daoFactory.getBannerDao();
+        this.categoryDao = getDaoFactory().getCategoryDao();
+        this.productDao = getDaoFactory().getProductDao();
+        this.bannerDao = getDaoFactory().getBannerDao();
     }
 
     @Override

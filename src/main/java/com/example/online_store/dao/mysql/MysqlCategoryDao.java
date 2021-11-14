@@ -50,22 +50,32 @@ public class MysqlCategoryDao extends MysqlDao implements CategoryDao {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
+        int idx = 0;
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement(Queries.Category.FIND_CATEGORIES_BY_PARENT_ID_BY_ORDER_NAME);
-            int idx = 0;
-            preparedStatement.setString(++idx, preferableLocale);
-            setParentId(preparedStatement, ++idx, parentId);
-            preparedStatement.setString(+idx, applicationProperties.getProperty("default-locale"));
-            setParentId(preparedStatement, ++idx, parentId);
-            preparedStatement.setString(++idx, preferableLocale);
-            setParentId(preparedStatement, ++idx, parentId);
+            if (parentId != 0) {
+                preparedStatement = connection.prepareStatement(Queries.Category.FIND_CATEGORIES_BY_PARENT_ID_BY_ORDER_NAME);
+                preparedStatement.setString(++idx, preferableLocale);
+                preparedStatement.setInt(++idx, parentId);
+                preparedStatement.setString(++idx, applicationProperties.getProperty("default-locale"));
+                preparedStatement.setInt(++idx, parentId);
+                preparedStatement.setString(++idx, preferableLocale);
+                preparedStatement.setInt(++idx, parentId);
+            } else {
+                preparedStatement = connection.prepareStatement(Queries.Category.FIND_CATEGORIES_BY_PARENT_ID_BY_ORDER_NAME_NULL);
+                preparedStatement.setString(++idx, preferableLocale);
+//                preparedStatement.setInt(++idx, parentId);
+                preparedStatement.setString(++idx, applicationProperties.getProperty("default-locale"));
+//                preparedStatement.setInt(++idx, parentId);
+                preparedStatement.setString(++idx, preferableLocale);
+//                preparedStatement.setInt(++idx, parentId);
+            }
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                mapToCategory(resultSet);
+                categoryList.add(mapToCategory(resultSet));
             }
         } catch (SQLException e) {
-            log.error("Cannot find categories by parent_id sorted by name");
+            log.error("Cannot find categories by parent_id sorted by name", e);
         } finally {
             close(resultSet);
             close(preparedStatement);
@@ -83,11 +93,9 @@ public class MysqlCategoryDao extends MysqlDao implements CategoryDao {
                 .build();
     }
 
-    private void setParentId(PreparedStatement preparedStatement, int idx, int parentId) throws SQLException {
-        if (parentId == 0) {
-            preparedStatement.setNull(idx, Types.INTEGER);
-        } else {
-            preparedStatement.setInt(idx, parentId);
+    private void setParentId(PreparedStatement preparedStatement, Integer idx, int parentId) throws SQLException {
+        if (parentId != 0) {
+            preparedStatement.setInt(++idx, parentId);
         }
     }
 }

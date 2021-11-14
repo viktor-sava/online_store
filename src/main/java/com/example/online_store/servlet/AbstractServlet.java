@@ -1,6 +1,7 @@
 package com.example.online_store.servlet;
 
 import com.example.online_store.ApplicationProperties;
+import com.example.online_store.dao.DAOFactory;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
@@ -19,12 +20,21 @@ public abstract class AbstractServlet extends HttpServlet {
 
     protected ApplicationProperties applicationProperties;
 
+    private DAOFactory cachedDaoFactory;
+
     public AbstractServlet(String url) {
         this.url = url;
         this.applicationProperties = ApplicationProperties.getInstance();
     }
 
-    public String getLocale(HttpServletRequest req, HttpServletResponse resp) {
+    public final DAOFactory getDaoFactory() {
+        if (cachedDaoFactory == null) {
+            cachedDaoFactory = (DAOFactory) getServletContext().getAttribute("daoFactory");
+        }
+        return cachedDaoFactory;
+    }
+
+    public final String getLocale(HttpServletRequest req, HttpServletResponse resp) {
         return Arrays.stream(req.getCookies()).filter(p -> p.getName().equals("locale"))
                 .findAny()
                 .orElseGet(() -> {
@@ -34,11 +44,11 @@ public abstract class AbstractServlet extends HttpServlet {
                 }).getValue();
     }
 
-    public String getReferer(HttpServletRequest req) {
+    public final String getReferer(HttpServletRequest req) {
         return req.getHeader("referer").substring(req.getRequestURL().length());
     }
 
-    public void forward(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public final void forward(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.getRequestDispatcher(url).forward(request, response);
     }
 

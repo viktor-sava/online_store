@@ -25,8 +25,7 @@ public class LoginServlet extends AbstractServlet {
 
     @Override
     public void init() {
-        DAOFactory daoFactory = (DAOFactory) getServletContext().getAttribute("daoFactory");
-        this.accountDao = daoFactory.getAccountDao();
+        this.accountDao = getDaoFactory().getAccountDao();
     }
 
     @Override
