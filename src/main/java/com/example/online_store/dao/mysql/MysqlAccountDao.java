@@ -6,13 +6,17 @@ import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.*;
 
 public class MysqlAccountDao extends MysqlDao implements AccountDao {
 
     private static final Logger log = Logger.getLogger(MysqlAccountDao.class);
 
+    public static final String[] GENERATED_KEYS = {"id", "created_at", "is_blocked", "is_admin"};
+
     public MysqlAccountDao(DataSource dataSource) {
         super(dataSource);
+
     }
 
     @Override
@@ -52,34 +56,35 @@ public class MysqlAccountDao extends MysqlDao implements AccountDao {
     }
 
     @Override
-    public boolean saveAccount(Account account) {
+    public boolean insertAccount(Account account) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
         int idx = 0;
         try {
             connection = dataSource.getConnection();
             setAutoCommit(connection, false);
-            preparedStatement = connection.prepareStatement(Queries.Account.SAVE, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement = connection.prepareStatement(Queries.Account.SAVE);
             preparedStatement.setString(++idx, account.getSurname());
             preparedStatement.setString(++idx, account.getName());
             preparedStatement.setString(++idx, account.getPatronymic());
             preparedStatement.setString(++idx, account.getEmail());
             preparedStatement.setString(++idx, account.getPhone());
             preparedStatement.setString(++idx, account.getPassword());
-            resultSet = preparedStatement.executeQuery();
+            if (preparedStatement.executeUpdate() != 1) {
+                return false;
+            }
             connection.commit();
-            account.setId(resultSet.getInt("id"));
-            account.setCreateDate(resultSet.getTimestamp("created_at"));
-            account.setBlocked(resultSet.getBoolean("is_blocked"));
-            account.setAdmin(resultSet.getBoolean("is_admin"));
+            Account insertedAccount = findAccountByEmailOrPhone(account.getEmail(), account.getPhone());
+            account.setId(insertedAccount.getId());
+            account.setCreateDate(insertedAccount.getCreateDate());
+            account.setAdmin(insertedAccount.isAdmin());
+            account.setBlocked(insertedAccount.isBlocked());
             return true;
         } catch (SQLException e) {
             rollback(connection);
             log.error("Cannot save an account", e);
         } finally {
             setAutoCommit(connection, true);
-            close(resultSet);
             close(preparedStatement);
             close(connection);
         }

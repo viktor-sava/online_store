@@ -67,7 +67,7 @@ public class RegistrationServlet extends AbstractServlet {
                     .build();
             accountValidator.validateNotExistence(accountDao.findAccountByEmailOrPhone(email, phone));
             if (accountValidator.isValid()) {
-                accountValidator.checkCreating(accountDao.saveAccount(account));
+                accountValidator.checkCreating(accountDao.insertAccount(account));
                 if (accountValidator.isValid()) {
                     log.trace("Account with user_id " + account.getId() + " has been created");
                     httpSession.setAttribute("user_id", account.getId());

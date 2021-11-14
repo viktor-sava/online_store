@@ -107,6 +107,22 @@ public class Account implements Serializable {
         this.admin = admin;
     }
 
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", surname='" + surname + '\'' +
+                ", name='" + name + '\'' +
+                ", patronymic='" + patronymic + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", password='" + password + '\'' +
+                ", createDate=" + createDate +
+                ", blocked=" + blocked +
+                ", admin=" + admin +
+                '}';
+    }
+
     public static AccountBuilder builder() {
         return new AccountBuilder();
     }

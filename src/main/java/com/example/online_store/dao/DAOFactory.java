@@ -11,7 +11,8 @@ public interface DAOFactory {
     BannerDao getBannerDao();
 
     enum Type {
-        MYSQL
+        MYSQL,
+        HSQLDB
     }
 
     static DAOFactory getDAOFactory(Type type) {
